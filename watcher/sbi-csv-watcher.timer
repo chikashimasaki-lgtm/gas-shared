@@ -1,0 +1,10 @@
+[Unit]
+Description=SBI証券CSVの監視（1分ごと）
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+Unit=sbi-csv-watcher.service
+
+[Install]
+WantedBy=timers.target

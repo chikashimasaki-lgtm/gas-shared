@@ -1,0 +1,6 @@
+[Unit]
+Description=SBI証券CSVをAsset_Statusの取り込みフォルダへ移動
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/projects/sbi-csv-watcher/watch.py
