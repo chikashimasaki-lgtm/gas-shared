@@ -14,6 +14,7 @@
 | `modules/MarketCalendar.js` | 東証営業日・立会時間の判定 | Asset_Status / Sakata_Screener |
 | `modules/AutoFit.js` | 列幅の自動調整 | Sakata_Screener / JQuants_AccountingRisk |
 | `modules/SheetStyle.js` | 行バンディング・ヘッダ装飾 | Sakata_Screener / JQuants_AccountingRisk |
+| `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_`） | Asset_Kyoko / Asset_Yoshikuni |
 | `watcher/watch.py` | Downloads を監視し Drive の `CSV_inport` へCSVを送る | ChromeOS の Linux |
 
 ## 共有のしくみ
