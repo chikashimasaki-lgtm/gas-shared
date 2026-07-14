@@ -16,3 +16,14 @@ function removeBlankRows_(sheet, colCount) {
     if (values[i].every(c => c === '')) sheet.deleteRow(i + 2);
   }
 }
+
+// ヘッダー行の書き込みと装飾（1行目に header を書き、列幅を設定して1行目を固定）
+// colWidths は { 見出し名: 幅 } のマップ。マップにない列は defaultWidth を使う。
+function writeHeaderRow_(sheet, header, colWidths, defaultWidth) {
+  sheet.getRange(1, 1, 1, header.length)
+    .setValues([header]).setFontWeight('bold').setBackground('#d0e4f7');
+  const widths = colWidths || {};
+  const fallback = defaultWidth || 120;
+  header.forEach((h, i) => sheet.setColumnWidth(i + 1, widths[h] || fallback));
+  sheet.setFrozenRows(1);
+}
