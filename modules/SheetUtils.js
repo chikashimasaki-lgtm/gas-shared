@@ -17,13 +17,15 @@ function removeBlankRows_(sheet, colCount) {
   }
 }
 
-// ヘッダー行の書き込みと装飾（1行目に header を書き、列幅を設定して1行目を固定）
-// colWidths は { 見出し名: 幅 } のマップ。マップにない列は defaultWidth を使う。
+// ヘッダー行の書き込みと装飾（1行目に header を書き、bold＋背景色を付けて1行目を固定）
+// colWidths を渡したときだけ列幅を設定する（{ 見出し名: 幅 }。マップにない列は defaultWidth）。
+// colWidths を省略（null/undefined）すると列幅は変更しない＝各シートの既存幅を保つ。
 function writeHeaderRow_(sheet, header, colWidths, defaultWidth) {
   sheet.getRange(1, 1, 1, header.length)
     .setValues([header]).setFontWeight('bold').setBackground('#d0e4f7');
-  const widths = colWidths || {};
-  const fallback = defaultWidth || 120;
-  header.forEach((h, i) => sheet.setColumnWidth(i + 1, widths[h] || fallback));
+  if (colWidths) {
+    const fallback = defaultWidth || 120;
+    header.forEach((h, i) => sheet.setColumnWidth(i + 1, colWidths[h] || fallback));
+  }
   sheet.setFrozenRows(1);
 }
