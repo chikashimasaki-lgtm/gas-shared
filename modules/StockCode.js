@@ -7,7 +7,8 @@
 //  利用元  : JQuants_AccountingRisk, Sakata_Screener
 // ====================================================================
 
-// J-Quants の銘柄コードを4桁に正規化する（5桁末尾"0"のみ4桁化。それ以外はそのまま）。
+// J-Quantsの5桁コード（4桁ティッカー+末尾0）を、見慣れた4桁に正規化する。
+// 例: "72030" → "7203" / "130A0" → "130A"。5桁で末尾0のときのみ落とす。
 function to4_(code) {
   const c = String(code == null ? '' : code);
   return (c.length === 5 && c.slice(-1) === '0') ? c.slice(0, 4) : c;
