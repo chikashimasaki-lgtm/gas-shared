@@ -15,6 +15,7 @@
 | `modules/AutoFit.js` | 列幅の自動調整 | Sakata_Screener / JQuants_AccountingRisk |
 | `modules/SheetStyle.js` | 行バンディング・ヘッダ装飾 | Sakata_Screener / JQuants_AccountingRisk |
 | `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_`） | Asset_Kyoko / Asset_Yoshikuni |
+| `modules/BankCsvImport.js` | 銀行明細CSVの取込パイプライン（`importBankCsvFiles_`） | Asset_Kyoko / Asset_Yoshikuni |
 | `watcher/watch.py` | Downloads を監視し Drive の `CSV_inport` へCSVを送る | ChromeOS の Linux |
 
 ## 共有のしくみ
