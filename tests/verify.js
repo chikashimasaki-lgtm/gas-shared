@@ -87,11 +87,43 @@ const sandbox = {
   SpreadsheetApp: {}, PropertiesService: {}, ScriptApp: {}, Session: {},
 };
 
+// UrlFetchApp / SpreadsheetApp は FetchRetry・ConfirmUi のテストで差し替える
+let fetchPlan = [], fetchCalls = 0, slept = [];
+sandbox.UrlFetchApp = {
+  fetch: () => {
+    const p = fetchPlan[fetchCalls++];
+    if (p instanceof Error) throw p;
+    return { getResponseCode: () => p, getContentText: () => '{}' };
+  },
+};
+sandbox.Utilities.sleep = ms => slept.push(ms);
+
+let uiPlan = null, toasts = [];
+sandbox.SpreadsheetApp = {
+  getUi: () => {
+    if (uiPlan === 'no-ui') throw new Error('UIコンテキストがありません');
+    return { alert: () => uiPlan, ButtonSet: { YES_NO: 'YES_NO' }, Button: { YES: 'YES', NO: 'NO' } };
+  },
+  getActive: () => ({
+    toast: (msg, title) => {
+      if (uiPlan === 'toast-throws') throw new Error('toast失敗');
+      toasts.push({ msg, title });
+    },
+  }),
+};
+
 const modSrc = f => fs.readFileSync(path.join(__dirname, '..', 'modules', f), 'utf8');
-const M = new Function(...Object.keys(sandbox), `
-${modSrc('BankCsvImport.js')}
-return { importBankCsvFiles_ };
+const build = (files, exports, extra) => new Function(...Object.keys(sandbox), `
+${(extra || '')}
+${files.map(modSrc).join('\n')}
+return { ${exports.join(', ')} };
 `)(...Object.values(sandbox));
+
+const M = build(['BankCsvImport.js'], ['importBankCsvFiles_']);
+const R = build(['FetchRetry.js'], ['fetchWithRetry_']);
+// APP_NAME_ を定義した場合／しない場合の両方を作る（読み込み順に依存しないことの確認）
+const C = build(['ConfirmUi.js'], ['confirmDestructive_', 'confirmAppName_'], "const APP_NAME_ = '酒田五法';");
+const C0 = build(['ConfirmUi.js'], ['confirmDestructive_', 'confirmAppName_']);
 
 /* ── アサーション ─────────────────────────────────────────────────────────── */
 
@@ -263,6 +295,50 @@ console.log('\n【BankCsvImport】取込・重複除外・後片付け');
   const sheet = new FakeSheet([MIZUHO_HEADER.slice()]);
   const r = M.importBankCsvFiles_(mizuhoOpts(sheet));
   eq([r.added, r.skipped, r.files], [0, 0, 0], 'フォルダが空でも例外にならない');
+}
+
+console.log('\n【FetchRetry】429・5xx・通信例外だけ再試行する');
+{
+  const run = (plan, cfg) => {
+    fetchPlan = plan; fetchCalls = 0; slept = [];
+    let out = null, err = null;
+    try { out = R.fetchWithRetry_('u', {}, cfg); } catch (e) { err = e; }
+    return { code: out && out.getResponseCode(), calls: fetchCalls, slept, err: err && err.message };
+  };
+  eq(run([200]), { code: 200, calls: 1, slept: [], err: null }, '200は即返し・待たない');
+  eq(run([401]), { code: 401, calls: 1, slept: [], err: null }, '401は再試行しない（恒久エラー）');
+  eq(run([404]), { code: 404, calls: 1, slept: [], err: null }, '404も再試行しない');
+  eq(run([429, 200]), { code: 200, calls: 2, slept: [1500], err: null }, '429は再試行して回復する');
+  eq(run([500, 503, 200]), { code: 200, calls: 3, slept: [1500, 3000], err: null }, '5xxは倍々で待って再試行する');
+  eq(run([503, 503, 503]), { code: 503, calls: 3, slept: [1500, 3000], err: null },
+    '再試行しきったら最後の応答を返す（呼び元がステータスを見る）');
+  eq(run([new Error('timeout'), 200]), { code: 200, calls: 2, slept: [1500], err: null }, '通信例外からも回復する');
+  eq(run([new Error('t1'), new Error('t2'), new Error('t3')]),
+    { code: null, calls: 3, slept: [1500, 3000], err: 't3' }, '例外が続けば最後の例外を投げる');
+  eq(run([429, 429, 429, 429, 200], { retry: 4, backoffMs: 100 }),
+    { code: 200, calls: 5, slept: [100, 200, 400, 800], err: null }, '再試行回数と待ち時間は呼び出し側で変えられる');
+  eq(run([429, 200], { retry: 0 }), { code: 429, calls: 1, slept: [], err: null }, 'retry:0 なら再試行しない');
+}
+
+console.log('\n【ConfirmUi】破壊的操作の確認');
+{
+  const run = (mod, plan) => { uiPlan = plan; toasts = []; return mod.confirmDestructive_('題', '本文'); };
+  eq(run(C, 'YES'), true, 'はいを選べば続行する');
+  eq(run(C, 'NO'), false, 'いいえを選べば中止する');
+  eq(toasts, [{ msg: '操作をキャンセルしました', title: '酒田五法' }], 'キャンセル時はプロジェクト名でトーストを出す');
+  eq(run(C, 'no-ui'), true, 'UIが無い（トリガー実行）ときは確認を求めず続行する');
+  eq(toasts, [], 'そのときトーストも出さない');
+  eq(run(C0, 'NO'), false, 'APP_NAME_ が未定義でも動く');
+  eq(toasts, [{ msg: '操作をキャンセルしました', title: 'スクリプト' }], '未定義なら既定名を使う');
+  eq(C.confirmAppName_(), '酒田五法', 'APP_NAME_ を定義していればその名前');
+  eq(C0.confirmAppName_(), 'スクリプト', '未定義なら既定名');
+
+  // トーストが落ちても「キャンセルしたのにエラー」にはしない（Sakata_Screener に無かった保護）
+  uiPlan = 'toast-throws';
+  let threw = false;
+  try { eq(C.confirmDestructive_('題', '本文'), false, 'トーストが失敗しても false を返して中止する'); }
+  catch (e) { threw = true; }
+  eq(threw, false, 'トーストの失敗が呼び出し元へ例外として漏れない');
 }
 
 console.log('\n' + '─'.repeat(62));
