@@ -1,12 +1,12 @@
 // ====================================================================
 //  共通モジュール: 取り込み対象CSVの判定ルール（単一ソース）
 // ====================================================================
-//  Drive の取り込みフォルダ(CSV_inport)には Asset_Status / Asset_Kyoko /
-//  Asset_Yoshikuni の3案件のCSVが混在する。どのCSVがどの案件のものかを
-//  判定するルールを、このファイル1本に集約する。
+//  Drive の取り込みフォルダ(CSV_inport)には Asset_Status /
+//  Asset_Yoshikuni の2案件のCSVが混在する（Asset_Kyokoは2026-07-31廃止）。
+//  どのCSVがどの案件のものかを判定するルールを、このファイル1本に集約する。
 //
 //  リンク元: ~/projects/CsvRules.js
-//  利用元  : Asset_Status, Asset_Kyoko, Asset_Yoshikuni（いずれも src/ へ symlink）
+//  利用元  : Asset_Status, Asset_Yoshikuni（いずれも src/ へ symlink）
 //            + ~/projects/sbi-csv-watcher/watch.py（Python）
 //
 //  ⚠ watch.py は CSV_RULES の中身を「JSONとして」読む。値を足すときは

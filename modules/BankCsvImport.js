@@ -4,7 +4,9 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(BankCsvImport.js)して push する。
 //  リンク元: ~/projects/BankCsvImport.js
-//  利用元  : Asset_Kyoko（みずほ銀行）, Asset_Yoshikuni（ゆうちょ銀行）
+//  利用元  : Asset_Yoshikuni（ゆうちょ銀行）
+//            旧利用元 Asset_Kyoko（みずほ銀行）は2026-07-31廃止。keepFileOnEmptyMapping は
+//            Kyoko専用ではない汎用オプションとして残している。
 //
 //  Asset_Status は対象外。あちらは「ルールごとに最新1件のCSVを取得してシートを
 //  全面的に書き換える」方式で、こちらの「フォルダ内の全CSVを追記して重複を除外する」

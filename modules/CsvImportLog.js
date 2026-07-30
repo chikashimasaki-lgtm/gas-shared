@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(CsvImportLog.js)して push する。
 //  リンク元: ~/projects/CsvImportLog.js
-//  利用元  : Asset_Status, Asset_Kyoko, Asset_Yoshikuni
+//  利用元  : Asset_Status, Asset_Yoshikuni
 // ====================================================================
 
 // 取込結果を「CSVインポート履歴」シートへ記録する。

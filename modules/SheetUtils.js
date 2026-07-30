@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトへは symlink して clasp push する。
 //  実体   : ~/projects/gas-shared/modules/SheetUtils.js
-//  利用元 : Asset_Kyoko, Asset_Yoshikuni, Asset_Status
+//  利用元 : Asset_Yoshikuni, Asset_Status
 // ====================================================================
 
 // 重複判定用: 日付セルを yyyy/MM/dd 文字列に正規化する

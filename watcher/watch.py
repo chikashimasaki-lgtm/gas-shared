@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ChromeOS の Downloads に落ちた取り込み対象CSVを、Drive の CSV_inport へ送る。
 
-CSV_inport には Asset_Status / Asset_Kyoko / Asset_Yoshikuni の3案件のCSVが混在する。
+CSV_inport には Asset_Status / Asset_Yoshikuni の2案件のCSVが混在する。
 どのCSVが取り込み対象かの判定ルールは、GAS側と共有する単一ソース
 ~/projects/CsvRules.js の CSV_RULES を読んで使う（Pythonにルールを複製しない）。
 ルールを足すときは CsvRules.js だけを直し、各GASリポジトリを clasp push すること。

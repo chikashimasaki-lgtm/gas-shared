@@ -9,13 +9,13 @@
 | パス | 役割 | 利用元 |
 | --- | --- | --- |
 | `modules/UsageSheet.js` | 「使い方」シート生成（`build` / `buildDoc`） | GAS 10リポジトリ |
-| `modules/CsvRules.js` | 取り込み対象CSVの判定ルール（単一ソース） | Asset_Status / Asset_Kyoko / Asset_Yoshikuni / `watcher/watch.py` |
-| `modules/CsvImportLog.js` | 「CSVインポート履歴」シートへの記録 | Asset_Status / Asset_Kyoko / Asset_Yoshikuni |
+| `modules/CsvRules.js` | 取り込み対象CSVの判定ルール（単一ソース） | Asset_Status / Asset_Yoshikuni / `watcher/watch.py` |
+| `modules/CsvImportLog.js` | 「CSVインポート履歴」シートへの記録 | Asset_Status / Asset_Yoshikuni |
 | `modules/MarketCalendar.js` | 東証営業日・立会時間の判定 | Asset_Status / Sakata_Screener |
 | `modules/AutoFit.js` | 列幅の自動調整 | Sakata_Screener / JQuants_AccountingRisk |
 | `modules/SheetStyle.js` | 行バンディング・ヘッダ装飾 | Sakata_Screener / JQuants_AccountingRisk |
-| `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_`） | Asset_Kyoko / Asset_Yoshikuni |
-| `modules/BankCsvImport.js` | 銀行明細CSVの取込パイプライン（`importBankCsvFiles_`） | Asset_Kyoko / Asset_Yoshikuni |
+| `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_`） | Asset_Yoshikuni |
+| `modules/BankCsvImport.js` | 銀行明細CSVの取込パイプライン（`importBankCsvFiles_`） | Asset_Yoshikuni |
 | `modules/FetchRetry.js` | 1URL取得の再試行・指数バックオフ（`fetchWithRetry_`） | Sakata_Screener / JQuants_AccountingRisk |
 | `modules/ConfirmUi.js` | 破壊的操作の確認ダイアログ（`confirmDestructive_`） | Sakata_Screener / Asset_Status / Abitus-Automation |
 | `watcher/watch.py` | Downloads を監視し Drive の `CSV_inport` へCSVを送る | ChromeOS の Linux |
