@@ -30,6 +30,17 @@ const UsageSheet = {
   DEFAULT_WIDTHS: [300, 420],
 
   /**
+   * 同名シートが既にあれば削除する（再作成の前処理として build/buildDoc から共通利用）。
+   *
+   * @param {Spreadsheet} ss
+   * @param {string} sheetName
+   */
+  _deleteIfExists(ss, sheetName) {
+    const existing = ss.getSheetByName(sheetName);
+    if (existing) ss.deleteSheet(existing);
+  },
+
+  /**
    * 「使い方」シートを削除して作り直す。
    *
    * @param {Spreadsheet} ss    対象スプレッドシート
@@ -50,8 +61,7 @@ const UsageSheet = {
     const widths    = opts.columnWidths || this.DEFAULT_WIDTHS;
     const nCols     = widths.length;
 
-    const existing = ss.getSheetByName(sheetName);
-    if (existing) ss.deleteSheet(existing);
+    this._deleteIfExists(ss, sheetName);
 
     // 挿入位置は既存シート削除後に決める（'last' を削除前に数えると範囲外になる）
     const index = (opts.index === 'last')     ? ss.getSheets().length
@@ -132,8 +142,7 @@ const UsageSheet = {
   buildDoc(ss, sheetName, rows, options) {
     const opts = options || {};
 
-    const old = ss.getSheetByName(sheetName);
-    if (old) ss.deleteSheet(old);
+    this._deleteIfExists(ss, sheetName);
     const sh = ss.insertSheet(sheetName, 0);
     sh.setHiddenGridlines(true);
     sh.setColumnWidth(1, opts.columnWidth || this.DOC_COL_WIDTH);
