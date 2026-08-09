@@ -13,15 +13,18 @@
 //  変わってしまわないようにする。確認ダイアログは ConfirmUi.js の confirmDestructive_、
 //  トースト見出しは同じく ConfirmUi.js の confirmAppName_（各プロジェクトの APP_NAME_）を使う。
 //
-//  アーカイブ群の並び順への配置（既存の古いアーカイブの左に差し込む等）はプロジェクトごとに
-//  アンカーシートの有無が異なるため、ここには持ち込まず o.placeSheet コールバックへ委譲する。
+//  アーカイブ群の並び順は、name（YYYYMMDD）より前の日付を持つ既存アーカイブシートのうち
+//  最も新しいものを探し、その左（同じインデックス位置）に新シートを移動する。既存の
+//  アーカイブが1つも無い場合だけ、o.anchorSheetName で渡された固定シートの位置へ移動する
+//  （両方とも無ければ copyTo() のデフォルト位置＝複製元の直後のまま）。
 // ====================================================================
 
 /**
  * @param {Object} o
- * @param {Spreadsheet} o.ss           対象スプレッドシート
- * @param {Sheet}       [o.sheet]      複製元シート（既定: 前月1日（YYYYMMDD）という名前のシートを名前で検索）
- * @param {function}    [o.placeSheet] (ss, copySheet, archiveName) => void  複製後の配置（既定: 何もしない＝copyToの直後）
+ * @param {Spreadsheet} o.ss                対象スプレッドシート
+ * @param {Sheet}       [o.sheet]           複製元シート（既定: 前月1日（YYYYMMDD）という名前のシートを名前で検索）
+ * @param {string}      [o.anchorSheetName] 既存アーカイブが1つも無い場合の配置基準シート名
+ * @param {function}    [o.placeSheet]      (ss, copySheet, archiveName) => void  配置ロジックを独自のものに差し替えたい場合に使う（既定は上記の直近アーカイブの左への配置）
  * @return {Sheet|null} 作成したシート。ガード・キャンセルで中断した場合は null
  */
 function createMonthlySheet_(o) {
@@ -58,10 +61,35 @@ function createMonthlySheet_(o) {
   const copy = active.copyTo(ss);
   copy.setName(archiveName);
   freezeColoredFormulas_(copy);
-  if (o.placeSheet) o.placeSheet(ss, copy, archiveName);
+  (o.placeSheet || placeMonthlySheet_)(ss, copy, archiveName, o.anchorSheetName);
 
   ss.toast(`「${archiveName}」を作成しました`, confirmAppName_(), 5);
   return copy;
+}
+
+// name（YYYYMMDD）より前の日付を持つ既存アーカイブシートのうち最も新しいものを探し、
+// その左（同じインデックス位置）に sheet を移動する。前月シートが無ければ
+// anchorSheetName の位置へ移動。それも無ければ何もしない（copyTo() のデフォルト位置のまま）。
+function placeMonthlySheet_(ss, sheet, name, anchorSheetName) {
+  const dateVal = Number(name);
+  const olderNames = ss.getSheets()
+    .map(s => s.getName())
+    .filter(n => /^\d{8}$/.test(n) && n !== name)
+    .map(Number)
+    .filter(n => n < dateVal)
+    .sort((a, b) => b - a);
+
+  let targetIndex;
+  if (olderNames.length > 0) {
+    targetIndex = ss.getSheetByName(String(olderNames[0])).getIndex();
+  } else if (anchorSheetName) {
+    const anchor = ss.getSheetByName(anchorSheetName);
+    targetIndex = anchor ? anchor.getIndex() : ss.getSheets().length;
+  } else {
+    return;
+  }
+  sheet.activate();
+  ss.moveActiveSheet(targetIndex);
 }
 
 // 背景色が黄(#ffff00)または緑(#00ff00)で、かつ数式が入っているセルだけを、
