@@ -42,8 +42,6 @@ const CSV_RULES = {
   "as_pnl_bond":     { "namePrefixes": ["BOND_"] },
   "as_pnl_fund":     { "namePrefixes": ["FUND_"] },
 
-  "kyoko_mizuho":    { "nameRegex": "^[0-9]+\\.csv$", "textIncludes": ["810577", "明細通番"] },
-
   "yoshikuni":       { "textIncludes": ["10140-49561761", "取引日"] }
 };
 
