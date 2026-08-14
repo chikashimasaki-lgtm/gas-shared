@@ -63,11 +63,15 @@ def load_rules():
 
 
 def read_rows(path):
-    """CSVを全行読む。GAS側は Shift_JIS/MS932 で読むので合わせる。"""
+    """CSVを全行読む。UTF-8(BOM付き)のCSVはそのまま、Shift_JISのCSVはcp932で読む。"""
     try:
-        text = path.read_bytes().decode('cp932', errors='replace')
+        data = path.read_bytes()
     except OSError:
         return []
+    try:
+        text = data.decode('utf-8-sig')
+    except UnicodeDecodeError:
+        text = data.decode('cp932', errors='replace')
     return list(csv.reader(io.StringIO(text)))
 
 
