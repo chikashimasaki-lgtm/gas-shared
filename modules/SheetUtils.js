@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトへは symlink して clasp push する。
 //  実体   : ~/projects/gas-shared/modules/SheetUtils.js
-//  利用元 : Asset_Yoshikuni, Asset_Status
+//  利用元 : Asset_Yoshikuni, Asset_Status, Abitus-Automation, PdfAutoRename
 // ====================================================================
 
 // 重複判定用: 日付セルを yyyy/MM/dd 文字列に正規化する
@@ -50,4 +50,13 @@ function writeHeaderRow_(sheet, header, colWidths, defaultWidth) {
     header.forEach((h, i) => sheet.setColumnWidth(i + 1, colWidths[h] || fallback));
   }
   sheet.setFrozenRows(1);
+}
+
+// Webhook/スクレイピング/CSV取込などで受け取った外部由来のテキストをシートへ書き込む前の
+// 無害化。先頭が = + - @ の文字列は Google Sheets が数式として解釈してしまうため、
+// 先頭に ' を付けて常に文字列として書き込まれるようにする（表示内容は変わらない）。
+// 元は Abitus-Automation・PdfAutoRename がそれぞれ個別に持っていた同一ロジックをここへ集約。
+function sanitizeForSheetCell_(value) {
+  const v = value == null ? '' : String(value);
+  return /^[=+\-@]/.test(v) ? "'" + v : v;
 }
