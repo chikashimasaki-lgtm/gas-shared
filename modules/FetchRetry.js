@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(FetchRetry.js)して push する。
 //  リンク元: ~/projects/FetchRetry.js
-//  利用元  : Sakata_Screener, JQuants_AccountingRisk
+//  利用元  : Sakata_Screener, JQuants_AccountingRisk, Asset_Yoshikuni_Securities
 //
 //  数百銘柄をページングで回す処理では、429（レート制限）や5xx（一時障害）は必ず起きる。
 //  1回の失敗で throw すると、それまでに取得したページごと捨てて処理全体が落ちる。

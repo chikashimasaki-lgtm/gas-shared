@@ -16,7 +16,7 @@
 | `modules/SheetStyle.js` | 行バンディング・ヘッダ装飾 | Sakata_Screener / JQuants_AccountingRisk |
 | `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_`） | Asset_Yoshikuni |
 | `modules/BankCsvImport.js` | 銀行明細CSVの取込パイプライン（`importBankCsvFiles_`） | Asset_Yoshikuni |
-| `modules/FetchRetry.js` | 1URL取得の再試行・指数バックオフ（`fetchWithRetry_`） | Sakata_Screener / JQuants_AccountingRisk |
+| `modules/FetchRetry.js` | 1URL取得の再試行・指数バックオフ（`fetchWithRetry_`） | Sakata_Screener / JQuants_AccountingRisk / Asset_Yoshikuni_Securities |
 | `modules/ConfirmUi.js` | 破壊的操作の確認ダイアログ（`confirmDestructive_`） | Sakata_Screener / Asset_Status / Abitus-Automation |
 | `watcher/watch.py` | Downloads を監視し Drive の `CSV_inport` へCSVを送る | ChromeOS の Linux |
 
