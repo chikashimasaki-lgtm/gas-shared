@@ -1,3 +1,4 @@
 watcher/archive/
 watcher/watch.log
 __pycache__/
+watcher/folder_id.txt

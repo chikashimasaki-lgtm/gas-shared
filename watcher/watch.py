@@ -39,7 +39,21 @@ ARCHIVE   = BASE / 'archive'          # アップロード済みの原本
 LOG       = BASE / 'watch.log'
 CLASPRC   = Path.home() / '.clasprc.json'
 RULES_JS  = BASE.parent / 'modules' / 'CsvRules.js'    # GASと共有する単一ソース
-FOLDER_ID = '146HCIoiqTdD2vr-uFJNhvgk4t51a4kis'        # 3案件共通の取り込みフォルダ
+
+# 取り込みフォルダ（CSV_inport）のID。publicリポに内部IDを置かないため、
+# gitignore した watcher/folder_id.txt か環境変数 CSV_INPORT_FOLDER_ID から読む。
+def _folder_id():
+    import os
+    p = BASE / 'folder_id.txt'
+    if p.exists():
+        return p.read_text(encoding='utf-8').strip()
+    v = os.environ.get('CSV_INPORT_FOLDER_ID', '').strip()
+    if v:
+        return v
+    raise SystemExit('取り込みフォルダIDが未設定です。watcher/folder_id.txt を作成するか '
+                     '環境変数 CSV_INPORT_FOLDER_ID を設定してください。')
+
+FOLDER_ID = _folder_id()
 
 # 更新から MAX_AGE_H 時間を過ぎたCSVは送らずに削除する。Downloadsに古いCSVが残っていると、
 # 「保有証券一覧」などの全置換シートを古い残高で上書きしてしまうため。
