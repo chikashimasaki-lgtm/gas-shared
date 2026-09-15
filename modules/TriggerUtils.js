@@ -4,7 +4,8 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの src/ にシンボリックリンク(TriggerUtils.js)して clasp push する。
 //  リンク元: ~/projects/TriggerUtils.js
-//  利用元  : Sakata_Screener, JQuants_AccountingRisk, Asset_Status
+//  利用元  : Sakata_Screener, JQuants_AccountingRisk, Asset_Status, Abitus-Automation,
+//            Asset_Yoshikuni_Securities, PdfAutoRename, WeeklyScheduler
 // ====================================================================
 
 /**

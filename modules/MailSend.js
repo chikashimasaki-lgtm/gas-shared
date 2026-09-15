@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(MailSend.js)して push する。
 //  リンク元: ~/projects/MailSend.js
-//  利用元  : Abitus-Automation, Sakata_Screener
+//  利用元  : Abitus-Automation, Sakata_Screener, WeeklyScheduler
 //
 //  スクリプトプロパティ MAILRELAY_URL / MAIL_SECRET が設定されていれば
 //  MailRelay（~/projects/MailRelay）のWebアプリ経由で送信する。

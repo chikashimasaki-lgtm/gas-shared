@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(ConfirmUi.js)して push する。
 //  リンク元: ~/projects/ConfirmUi.js
-//  利用元  : Sakata_Screener, Asset_Status, Abitus-Automation
+//  利用元  : Sakata_Screener, Asset_Status, Abitus-Automation, WeeklyScheduler
 //
 //  3リポジトリで同じ実装が重複し、片方だけ直る状態になっていた（実際、キャンセル時の
 //  トーストを try/catch で保護する修正が Sakata_Screener にだけ入っていなかった）。
