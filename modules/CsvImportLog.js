@@ -11,6 +11,8 @@
 // 対象シートごとに1行で、同じ対象シートの行があれば上書きし、無ければ追記する。
 // ログシートが無ければ「使い方」シートの直後（無ければ末尾）に作成する。
 function logCsvImportTo_(ss, logSheetName, howtoSheetName, fileName, sheetName, count, skipCount) {
+  fileName  = sanitizeForSheetCell_(fileName);
+  sheetName = sanitizeForSheetCell_(sheetName);
   let logSheet = ss.getSheetByName(logSheetName);
   if (!logSheet) {
     const howto = ss.getSheetByName(howtoSheetName);
