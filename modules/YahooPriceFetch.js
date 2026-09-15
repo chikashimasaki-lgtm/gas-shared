@@ -18,13 +18,17 @@
  * @param {number} [opts.chunkSize=40]     1回の fetchAll でまとめるリクエスト数
  * @param {number} [opts.maxMillis=180000] 全体の実行時間上限（時間保険）
  * @param {number} [opts.sleepMillis=200]  チャンク間の待機（ミリ秒）
+ * @param {number} [opts.maxRetry=2]      429/5xx時の再試行回数（失敗分のみ指数バックオフ）
+ * @param {number} [opts.backoffMillis=500] 再試行の初回待機（ミリ秒。指数的に倍増）
  * @return {Object<string, number>} 取得できたコードのみ { code: price } のマップ
  */
 function fetchYahooPricesJP_(tickers, opts) {
   opts = opts || {};
-  const chunkSize   = opts.chunkSize   || 40;
-  const maxMillis   = opts.maxMillis   || 3 * 60 * 1000;
-  const sleepMillis = opts.sleepMillis != null ? opts.sleepMillis : 200;
+  const chunkSize     = opts.chunkSize     || 40;
+  const maxMillis     = opts.maxMillis     || 3 * 60 * 1000;
+  const sleepMillis   = opts.sleepMillis   != null ? opts.sleepMillis   : 200;
+  const maxRetry      = opts.maxRetry      != null ? opts.maxRetry      : 2;
+  const backoffMillis = opts.backoffMillis || 500;
 
   const out   = {};
   const uniq  = Array.from(new Set((tickers || []).filter(Boolean).map(String)));
@@ -39,6 +43,23 @@ function fetchYahooPricesJP_(tickers, opts) {
     }));
     let resps;
     try { resps = UrlFetchApp.fetchAll(reqs); } catch (e) { continue; }
+
+    // 429(レート制限)/5xx(一時障害)だけ、失敗分に絞って指数バックオフで再試行する。
+    // 以前は非200を黙ってスキップしていたため、一時的なレート制限でも該当銘柄が丸ごと欠落していた。
+    for (let attempt = 1; attempt <= maxRetry && Date.now() - start <= maxMillis; attempt++) {
+      const retryIdx = [];
+      resps.forEach((r, j) => {
+        const code = r ? r.getResponseCode() : 0;
+        if (code === 429 || code >= 500) retryIdx.push(j);
+      });
+      if (!retryIdx.length) break;
+      Utilities.sleep(backoffMillis * Math.pow(2, attempt - 1));
+      let again;
+      try { again = UrlFetchApp.fetchAll(retryIdx.map(j => reqs[j])); }
+      catch (e) { break; }
+      retryIdx.forEach((j, k) => { resps[j] = again[k]; });
+    }
+
     resps.forEach((res, j) => {
       try {
         if (res.getResponseCode() !== 200) return;
