@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの src/ にシンボリックリンク(MarketCalendar.js)して clasp push する。
 //  リンク元: ~/projects/MarketCalendar.js
-//  利用元  : Asset_Status, Sakata_Screener
+//  利用元  : Asset_Status, Sakata_Screener, WeeklyScheduler
 // ====================================================================
 
 // 東証の営業日か判定（JST基準）。

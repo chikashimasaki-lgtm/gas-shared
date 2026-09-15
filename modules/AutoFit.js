@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの src/ にシンボリックリンク(AutoFit.js)して clasp push する。
 //  リンク元: ~/projects/AutoFit.js
-//  利用元  : Sakata_Screener, JQuants_AccountingRisk
+//  利用元  : Sakata_Screener, JQuants_AccountingRisk, PdfAutoRename
 // ====================================================================
 
 // 列幅を「データまたはヘッダの内容の最大幅」に調整する。

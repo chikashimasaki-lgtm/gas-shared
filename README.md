@@ -11,14 +11,18 @@
 | `modules/UsageSheet.js` | 「使い方」シート生成（`build` / `buildDoc`） | GAS 10リポジトリ |
 | `modules/CsvRules.js` | 取り込み対象CSVの判定ルール（単一ソース） | Asset_Status / Asset_Yoshikuni / `watcher/watch.py` |
 | `modules/CsvImportLog.js` | 「CSVインポート履歴」シートへの記録 | Asset_Status / Asset_Yoshikuni |
-| `modules/MarketCalendar.js` | 東証営業日・立会時間の判定 | Asset_Status / Sakata_Screener |
-| `modules/AutoFit.js` | 列幅の自動調整 | Sakata_Screener / JQuants_AccountingRisk |
+| `modules/MarketCalendar.js` | 東証営業日・立会時間の判定 | Asset_Status / Sakata_Screener / WeeklyScheduler |
+| `modules/AutoFit.js` | 列幅の自動調整 | Sakata_Screener / JQuants_AccountingRisk / PdfAutoRename |
 | `modules/SheetStyle.js` | 行バンディング・ヘッダ装飾 | Sakata_Screener / JQuants_AccountingRisk |
-| `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_`） | Asset_Yoshikuni |
+| `modules/SheetUtils.js` | シート操作ユーティリティ（`removeBlankRows_` / `sanitizeForSheetCell_`） | Asset_Yoshikuni / Asset_Status / Abitus-Automation / PdfAutoRename / Sakata_Screener |
 | `modules/BankCsvImport.js` | 銀行明細CSVの取込パイプライン（`importBankCsvFiles_`） | Asset_Yoshikuni |
-| `modules/FetchRetry.js` | 1URL取得の再試行・指数バックオフ（`fetchWithRetry_`） | Sakata_Screener / JQuants_AccountingRisk / Asset_Yoshikuni_Securities |
-| `modules/ConfirmUi.js` | 破壊的操作の確認ダイアログ（`confirmDestructive_`） | Sakata_Screener / Asset_Status / Abitus-Automation |
+| `modules/FetchRetry.js` | 1URL取得の再試行・指数バックオフ（`fetchWithRetry_`） | Sakata_Screener / JQuants_AccountingRisk / Asset_Yoshikuni_Securities / WeeklyScheduler |
+| `modules/ConfirmUi.js` | 破壊的操作の確認ダイアログ（`confirmDestructive_`） | Sakata_Screener / Asset_Status / Abitus-Automation / WeeklyScheduler |
 | `modules/RedactUtil.js` | 例外メッセージ中のAPIキーの伏字化（`redactApiKey_`） | Abitus-Automation / PdfAutoRename / Sakata_Screener |
+| `modules/TriggerUtils.js` | プロジェクトトリガーの掃除（`clearTriggersFor_`） | Sakata_Screener / JQuants_AccountingRisk / Asset_Status / Abitus-Automation / Asset_Yoshikuni_Securities / PdfAutoRename / WeeklyScheduler |
+| `modules/MonthlySheet.js` | 月末アーカイブシートの作成（`createMonthlySheet_`） | Asset_Status |
+| `modules/MailSend.js` | MailRelay経由のメール送信（`sendMail_`） | Abitus-Automation / Sakata_Screener / WeeklyScheduler |
+| `modules/StockCode.js` | 銘柄コード関連ユーティリティ | JQuants_AccountingRisk / Sakata_Screener |
 | `watcher/watch.py` | Downloads を監視し Drive の `CSV_inport` へCSVを送る | ChromeOS の Linux |
 
 ## 共有のしくみ
