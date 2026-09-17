@@ -124,6 +124,7 @@ const R = build(['FetchRetry.js'], ['fetchWithRetry_']);
 // APP_NAME_ を定義した場合／しない場合の両方を作る（読み込み順に依存しないことの確認）
 const C = build(['ConfirmUi.js'], ['confirmDestructive_', 'confirmAppName_'], "const APP_NAME_ = '酒田五法';");
 const C0 = build(['ConfirmUi.js'], ['confirmDestructive_', 'confirmAppName_']);
+const G = build(['GeminiRetry.js'], ['isDailyQuotaExceeded_', 'extractRetryDelay_']);
 
 /* ── アサーション ─────────────────────────────────────────────────────────── */
 
@@ -339,6 +340,29 @@ console.log('\n【ConfirmUi】破壊的操作の確認');
   try { eq(C.confirmDestructive_('題', '本文'), false, 'トーストが失敗しても false を返して中止する'); }
   catch (e) { threw = true; }
   eq(threw, false, 'トーストの失敗が呼び出し元へ例外として漏れない');
+}
+
+console.log('\n【GeminiRetry】Geminiのエラー応答の読み取り');
+{
+  const quota = ids => ({ error: { details: [
+    { '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: ids.map(q => ({ quotaId: q })) },
+  ] } });
+  eq(G.isDailyQuotaExceeded_(quota(['GenerateRequestsPerDayPerProject'])), true, '日次上限(PerDay)なら true');
+  eq(G.isDailyQuotaExceeded_(quota(['GenerateRequestsPerMinutePerProject'])), false, '分次上限(PerMinute)は false＝待てば回復する');
+  eq(G.isDailyQuotaExceeded_(quota(['PerMinute', 'RequestsPerDay'])), true, '複数のうち1つでもPerDayなら true');
+  eq(G.isDailyQuotaExceeded_({}), false, 'error が無い応答でも落ちずに false');
+  eq(G.isDailyQuotaExceeded_({ error: { details: [] } }), false, 'QuotaFailure が無ければ false');
+  eq(G.isDailyQuotaExceeded_({ error: { details: [{ '@type': 'x', violations: [{}] }] } }), false,
+    'quotaId が無い violation でも落ちない');
+
+  const retry = v => ({ error: { details: [
+    { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: v },
+  ] } });
+  eq(G.extractRetryDelay_(retry('15s')), 16, '指定秒数に1秒足して返す（境界で再送しない）');
+  eq(G.extractRetryDelay_(retry('0s')), 1, '0s でも1秒は待つ');
+  eq(G.extractRetryDelay_({}), 30, 'RetryInfo が無ければ既定の30秒');
+  eq(G.extractRetryDelay_({ error: { details: [{ '@type': 'other' }] } }), 30, 'RetryInfo 以外しか無くても30秒');
+  eq(G.extractRetryDelay_(retry(undefined)), 30, 'retryDelay が欠けていれば30秒');
 }
 
 console.log('\n' + '─'.repeat(62));
