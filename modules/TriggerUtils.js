@@ -6,7 +6,7 @@
 //  リンク元: ~/projects/TriggerUtils.js
 //  利用元  : Sakata_Screener, JQuants_AccountingRisk, Asset_Status, Abitus-Automation,
 //            Asset_Yoshikuni_Securities, PdfAutoRename, WeeklyScheduler, GSS_ConvertJPGtoDOC,
-//            tomochika-ryugaku-chat, ReceiptstoSheet, BusinessCardToSheet
+//            tomochika-ryugaku-chat, ReceiptstoSheet, BusinessCardToSheet, AuditPOC
 // ====================================================================
 
 /**
