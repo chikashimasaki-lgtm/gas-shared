@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(MonthlySheet.js)して push する。
 //  リンク元: ~/projects/MonthlySheet.js
-//  利用元  : Asset_Status
+//  利用元  : Asset_Status, Asset_Yoshikuni
 //
 //  「その月の1日」（YYYYMMDD）という名前の作業用シートを複製し、前月末日（YYYYMMDD）に
 //  リネームして保存する。複製元は名前で特定する（アクティブシートに依存すると、たまたま
