@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(GeminiRetry.js)して push する。
 //  リンク元: ~/projects/GeminiRetry.js
-//  利用元  : ReceiptstoSheet, BusinessCardToSheet
+//  利用元  : ReceiptstoSheet, BusinessCardToSheet, PdfAutoRename
 // ====================================================================
 //  Gemini の 429 応答は「1日の上限に達した（待っても回復しない）」場合と
 //  「短期のレート超過（待てば回復する）」場合の両方で返る。両者を取り違えると、
