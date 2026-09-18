@@ -13,11 +13,12 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECTS="$(dirname "$REPO")"
 
 echo "== 1. 共通モジュールのリンクを張る =="
-for f in "$REPO"/modules/*.js; do
-  name="$(basename "$f")"
-  ln -sfn "gas-shared/modules/$name" "$PROJECTS/$name"
-  echo "  $PROJECTS/$name -> gas-shared/modules/$name"
-done
+# リンクの規則は check-links.sh に集約している（setup.sh とフックで同じ実装を使う）
+"$REPO/check-links.sh" --fix
+
+echo "== 1b. git フックを有効化する（pull でリンクを自動修復） =="
+git -C "$REPO" config core.hooksPath githooks
+echo "  core.hooksPath = githooks"
 
 echo "== 2. CSVウォッチャーを登録する =="
 mkdir -p "$HOME/.config/systemd/user"

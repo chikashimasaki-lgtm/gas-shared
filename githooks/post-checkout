@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# gas-shared を pull した直後に共通モジュールの中間リンクを張り直す。
+# モジュールを追加しても ~/projects/<name>.js は git 管理外で誰も作らないため、
+# ここで自動修復しないと利用元リポの symlink が切れたままになる。
+exec "$(git rev-parse --show-toplevel)/check-links.sh" --fix
