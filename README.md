@@ -22,7 +22,6 @@
 | `modules/TriggerUtils.js` | プロジェクトトリガーの掃除（`clearTriggersFor_`） | Sakata_Screener / JQuants_AccountingRisk / Asset_Status / Abitus-Automation / Asset_Yoshikuni_Securities / PdfAutoRename / WeeklyScheduler |
 | `modules/MonthlySheet.js` | 月末アーカイブシートの作成（`createMonthlySheet_`） | Asset_Status |
 | `modules/MailSend.js` | MailRelay経由のメール送信（`sendMail_`） | Abitus-Automation / Sakata_Screener / WeeklyScheduler |
-| `modules/GeminiKey.js` | Gemini APIキーの取得口（`getGeminiApiKey_`。スクリプトプロパティ→共有ライブラリ GeminiSecrets。鍵そのものは置かない） | YouTubeDailyDigest |
 | `modules/StockCode.js` | 銘柄コード関連ユーティリティ | JQuants_AccountingRisk / Sakata_Screener |
 | `watcher/watch.py` | Downloads を監視し Drive の `CSV_inport` へCSVを送る | ChromeOS の Linux |
 
