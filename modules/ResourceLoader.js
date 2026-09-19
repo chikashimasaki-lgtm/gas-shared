@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(ResourceLoader.js)して push する。
 //  リンク元: ~/projects/ResourceLoader.js
-//  利用元  : AuditPOC, FraudAuditPOC
+//  利用元  : AuditPOC（FraudAuditPOC は 2026-09-19 に廃止）
 //            （AuditPOCから分離した際にCommon.jsごとコピペされ、2ファイルで
 //            バイト単位の重複になっていたものを切り出した）
 //

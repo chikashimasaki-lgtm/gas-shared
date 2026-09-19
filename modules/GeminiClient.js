@@ -4,7 +4,7 @@
 //  複数のGASプロジェクトで共有する単一ソース。編集はこのファイルだけで行い、
 //  各プロジェクトの clasp rootDir にシンボリックリンク(GeminiClient.js)して push する。
 //  リンク元: ~/projects/GeminiClient.js
-//  利用元  : AuditPOC, FraudAuditPOC, RiskBasedPlanPOC
+//  利用元  : AuditPOC（FraudAuditPOC / RiskBasedPlanPOC は 2026-09-19 に廃止）
 //            （AuditPOCから分離した際にCommon.jsごとコピペされ、3ファイルで
 //            バイト単位の重複になっていたものを切り出した）
 //
