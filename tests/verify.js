@@ -365,6 +365,102 @@ console.log('\n【GeminiRetry】Geminiのエラー応答の読み取り');
   eq(G.extractRetryDelay_(retry(undefined)), 30, 'retryDelay が欠けていれば30秒');
 }
 
+/* ── UsageSheet: 使い方シートは常に一番右 ──────────────────────────────── */
+
+console.log('\n■ UsageSheet — 使い方シートの配置');
+{
+  // insertSheet(name, index) の index だけを見たいので、最小限のスプレッドシートを作る
+  function fakeSs(names) {
+    let seq = 0;
+    const sheets = names.map(n => ({ name: n, __id: ++seq, getSheetId() { return this.__id; } }));
+    const calls = [];
+    const stub = {
+      setFrozenRows() { return this; }, setColumnWidth() { return this; },
+      setTabColor() { return this; }, setHiddenGridlines() { return this; },
+      setRowHeight() { return this; },
+      getRange() { return this; }, getRangeList() { return this; },
+      setValues() { return this; }, setValue() { return this; },
+      setFontWeight() { return this; }, setFontSize() { return this; },
+      setFontColor() { return this; }, setBackground() { return this; },
+      setFontFamily() { return this; }, setWrap() { return this; },
+      setVerticalAlignment() { return this; }, setHorizontalAlignment() { return this; },
+      setNumberFormat() { return this; }, merge() { return this; },
+      getLastRow() { return 0; }, getMaxRows() { return 1000; },
+      autoResizeColumn() { return this; },
+      getDataRange() { return this; }, getSheetId() { return this.__id; },
+    };
+    return {
+      calls,
+      getSheets: () => sheets.slice(),
+      getSheetByName: n => sheets.find(x => x.name === n) || null,
+      deleteSheet(sh) { const i = sheets.indexOf(sh); if (i >= 0) sheets.splice(i, 1); },
+      insertSheet(name, index) {
+        calls.push({ name, index });
+        const sh = Object.assign({ name, __id: ++seq }, stub);
+        sheets.splice(index === undefined ? sheets.length : index, 0, sh);
+        return sh;
+      },
+      active: null,
+      getActiveSheet() { return this.active; },
+      setActiveSheet(sh) { this.active = sh; },
+      moveActiveSheet(pos) {
+        const i = sheets.indexOf(this.active);
+        if (i < 0) return;
+        sheets.splice(i, 1);
+        sheets.splice(pos - 1, 0, this.active);
+      },
+    };
+  }
+
+  const U = build(['UsageSheet.js'], ['UsageSheet']).UsageSheet;
+
+  // build(): 既存3枚 → index 3（＝一番右）
+  let ss = fakeSs(['データ', '設定', 'ログ']);
+  U.build(ss, 'テスト　使い方', ({ add }) => { add('本文', ''); });
+  eq(ss.calls[0].index, 3, 'build: 既存3枚なら index 3 ＝ 一番右に挿入');
+  eq(ss.getSheets().map(s => s.name).slice(-1)[0], '使い方', 'build: 実際に末尾へ並ぶ');
+
+  // 作り直し: 同名シートを消してから数えるので、位置がずれない
+  U.build(ss, 'テスト　使い方', ({ add }) => { add('本文', ''); });
+  eq(ss.calls[1].index, 3, 'build: 再作成でも一番右（削除後の枚数で数える）');
+  eq(ss.getSheets().length, 4, 'build: 再作成でシートが増えない');
+  eq(ss.getSheets().map(s => s.name).slice(-1)[0], '使い方', 'build: 再作成後も末尾');
+
+  // index を明示したときは従来どおりその位置
+  ss = fakeSs(['データ', '設定']);
+  U.build(ss, 'T', ({ add }) => { add('x', ''); }, { index: 0 });
+  eq(ss.calls[0].index, 0, 'build: index を明示すればその位置に入る');
+
+  // buildDoc() も同じ方針
+  ss = fakeSs(['データ', '設定', 'ログ', '履歴']);
+  U.buildDoc(ss, '手順', [['タイトル', 'title'], ['本文', 'p']]);
+  eq(ss.calls[0].index, 4, 'buildDoc: 既存4枚なら index 4 ＝ 一番右');
+  eq(ss.getSheets().map(s => s.name).slice(-1)[0], '手順', 'buildDoc: 実際に末尾へ並ぶ');
+
+  // シートが1枚しか無い場合
+  ss = fakeSs(['シート1']);
+  U.build(ss, 'T', ({ add }) => { add('x', ''); });
+  eq(ss.calls[0].index, 1, 'build: 1枚だけでも末尾（index 1）');
+
+  // moveToLast: 既存シートを開いたときに追従させる
+  ss = fakeSs(['使い方', 'データ', '設定']);
+  ss.setActiveSheet(ss.getSheetByName('データ'));
+  eq(U.moveToLast(ss), true, 'moveToLast: 左端にあれば移動する');
+  eq(ss.getSheets().map(s => s.name), ['データ', '設定', '使い方'], 'moveToLast: 末尾へ並ぶ');
+  eq(ss.getActiveSheet().name, 'データ', 'moveToLast: 元のアクティブシートに戻す');
+
+  eq(U.moveToLast(ss), false, 'moveToLast: 既に末尾なら何もしない');
+  eq(ss.getSheets().map(s => s.name), ['データ', '設定', '使い方'], 'moveToLast: 並びは変わらない');
+
+  ss = fakeSs(['データ', '設定']);
+  eq(U.moveToLast(ss), false, 'moveToLast: 使い方シートが無ければ何もしない');
+
+  ss = fakeSs(['データ', '使い方', 'ログ', '履歴']);
+  ss.setActiveSheet(ss.getSheetByName('ログ'));
+  U.moveToLast(ss);
+  eq(ss.getSheets().map(s => s.name), ['データ', 'ログ', '履歴', '使い方'], 'moveToLast: 中ほどからでも末尾へ');
+}
+
 console.log('\n' + '─'.repeat(62));
 console.log(fail === 0 ? `全 ${pass} 項目 合格` : `${pass} 合格 / ${fail} 失敗`);
 process.exit(fail === 0 ? 0 : 1);

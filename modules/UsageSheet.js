@@ -41,6 +41,32 @@ const UsageSheet = {
   },
 
   /**
+   * 既にある「使い方」シートを一番右へ移す。無ければ何もしない。
+   *
+   * 各プロジェクトの onOpen() から呼ぶことを想定している。build() は作り直したときしか
+   * 位置を直せないため、既存のスプレッドシートは開いたときにこれで追従させる。
+   * 既に一番右なら何もしないので、毎回開いても余計な書き込みは起きない。
+   *
+   * @param {Spreadsheet} ss
+   * @param {string} [sheetName] 既定は「使い方」
+   * @return {boolean} 実際に移動したか
+   */
+  moveToLast(ss, sheetName) {
+    const name = sheetName || this.SHEET_NAME;
+    const sheet = ss.getSheetByName(name);
+    if (!sheet) return false;
+    const sheets = ss.getSheets();
+    if (sheets[sheets.length - 1].getSheetId() === sheet.getSheetId()) return false;  // 既に末尾
+    // 【地雷】moveActiveSheet は「アクティブなシート」を動かすため、元のアクティブシートを
+    // 控えて必ず戻す。戻さないと、開くたびに使い方シートが表示されてしまう。
+    const active = ss.getActiveSheet();
+    ss.setActiveSheet(sheet);
+    ss.moveActiveSheet(sheets.length);
+    if (active) ss.setActiveSheet(active);
+    return true;
+  },
+
+  /**
    * 「使い方」シートを削除して作り直す。
    *
    * @param {Spreadsheet} ss    対象スプレッドシート
@@ -48,7 +74,7 @@ const UsageSheet = {
    * @param {function} fn       { add, addEmpty, addSection, addHeader } を受け取り本文を組み立てる
    *                            add / addHeader は列数ぶんの可変長引数を取る
    * @param {Object} [options]
-   * @param {number|string} [options.index=0] シートの挿入位置。'last' で末尾
+   * @param {number|string} [options.index='last'] シートの挿入位置。既定は末尾（一番右）
    * @param {boolean} [options.timestamp=true] 2行目に「最終更新: ...」を入れるか
    * @param {string} [options.sheetName]      シート名を既定から変える場合
    * @param {number[]} [options.columnWidths] 列幅。要素数がそのまま列数になる
@@ -64,8 +90,12 @@ const UsageSheet = {
     this._deleteIfExists(ss, sheetName);
 
     // 挿入位置は既存シート削除後に決める（'last' を削除前に数えると範囲外になる）
-    const index = (opts.index === 'last')     ? ss.getSheets().length
-                : (opts.index === undefined)  ? 0
+    // 使い方シートは常に一番右に置く（2026-09-19、全プロジェクト共通の方針）。
+    // 日々見るのはデータのシートで、使い方は読む頻度が低い。左端にあると毎回タブを
+    // 一つ余分にまたぐことになるため。
+    // 【注意】_deleteIfExists の後に数えること。同名シートを消した後の枚数が末尾の位置になる。
+    const index = (opts.index === undefined || opts.index === 'last')
+                ? ss.getSheets().length
                 : opts.index;
     const sheet = ss.insertSheet(sheetName, index);
 
@@ -137,13 +167,18 @@ const UsageSheet = {
    * @param {string} [options.tabColor]     タブ色
    * @param {number} [options.columnWidth]  A列の幅
    * @param {boolean} [options.activate=true] 作成後にそのシートを表示するか
+   * @param {number|string} [options.index='last'] 挿入位置。既定は末尾（一番右）
    * @return {Sheet} 作成したシート
    */
   buildDoc(ss, sheetName, rows, options) {
     const opts = options || {};
 
     this._deleteIfExists(ss, sheetName);
-    const sh = ss.insertSheet(sheetName, 0);
+    // 使い方シートは一番右（build と同じ方針）。位置を固定したい用途は index を明示する。
+    const index = (opts.index === undefined || opts.index === 'last')
+                ? ss.getSheets().length
+                : opts.index;
+    const sh = ss.insertSheet(sheetName, index);
     sh.setHiddenGridlines(true);
     sh.setColumnWidth(1, opts.columnWidth || this.DOC_COL_WIDTH);
 
