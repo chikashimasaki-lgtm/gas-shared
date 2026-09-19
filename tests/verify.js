@@ -125,6 +125,10 @@ const R = build(['FetchRetry.js'], ['fetchWithRetry_']);
 const C = build(['ConfirmUi.js'], ['confirmDestructive_', 'confirmAppName_'], "const APP_NAME_ = '酒田五法';");
 const C0 = build(['ConfirmUi.js'], ['confirmDestructive_', 'confirmAppName_']);
 const G = build(['GeminiRetry.js'], ['isDailyQuotaExceeded_', 'extractRetryDelay_']);
+// GeminiKey: スクリプトプロパティと共有ライブラリ(GeminiSecrets)の有無を切り替えて読み込む
+let keyProps = {};
+sandbox.PropertiesService = { getScriptProperties: () => ({ getProperty: k => (k in keyProps ? keyProps[k] : null) }) };
+const keyMod = lib => build(['GeminiKey.js'], ['getGeminiApiKey_', 'geminiKeySource_'], lib === undefined ? '' : 'const GeminiSecrets = ' + lib + ';');
 
 /* ── アサーション ─────────────────────────────────────────────────────────── */
 
@@ -459,6 +463,45 @@ console.log('\n■ UsageSheet — 使い方シートの配置');
   ss.setActiveSheet(ss.getSheetByName('ログ'));
   U.moveToLast(ss);
   eq(ss.getSheets().map(s => s.name), ['データ', 'ログ', '履歴', '使い方'], 'moveToLast: 中ほどからでも末尾へ');
+}
+
+console.log('\n【GeminiKey】スクリプトプロパティ → 共有ライブラリ → エラー の順に探す');
+{
+  const throwsMsg = fn => { try { fn(); return null; } catch (e) { return e.message; } };
+
+  keyProps = { GEMINI_API_KEY: 'prop-key' };
+  let K = keyMod("{ getKey: () => 'lib-key' }");
+  eq(K.getGeminiApiKey_(), 'prop-key', 'プロパティがあればそれを使う（ライブラリより優先＝既存案件は何も変わらない）');
+  eq(K.geminiKeySource_(), { ok: true, source: 'script-property' }, 'source: script-property');
+
+  keyProps = {};
+  eq(K.getGeminiApiKey_(), 'lib-key', 'プロパティが無ければ共有ライブラリの鍵を使う');
+  eq(K.geminiKeySource_(), { ok: true, source: 'shared-library' }, 'source: shared-library');
+
+  keyProps = { GEMINI_API_KEY: '' };
+  eq(K.getGeminiApiKey_(), 'lib-key', 'プロパティが空文字でもライブラリへフォールバック');
+
+  keyProps = {};
+  K = keyMod();
+  eq(/GEMINI_API_KEY が未設定/.test(throwsMsg(() => K.getGeminiApiKey_())), true, 'ライブラリ未追加（GeminiSecrets未定義）でも ReferenceError でなく標準エラー');
+  eq(K.geminiKeySource_(), { ok: false, source: 'none' }, 'どちらも無ければ source: none');
+
+  K = keyMod("{ getKey: () => '' }");
+  eq(/未設定/.test(throwsMsg(() => K.getGeminiApiKey_())), true, 'ライブラリの鍵が空（未貼付）ならエラー');
+  eq(K.geminiKeySource_().ok, false, 'ライブラリの鍵が空なら ok:false');
+
+  K = keyMod("{ getKey: () => { throw new Error('library unavailable'); } }");
+  eq(throwsMsg(() => K.getGeminiApiKey_()), 'library unavailable', 'ライブラリ呼び出しが例外なら握りつぶさずそのまま伝える（共有設定漏れ等の原因が分かる）');
+  eq(K.geminiKeySource_(), { ok: false, source: 'none' }, 'ライブラリ呼び出しが例外なら診断は none（診断関数は落ちない）');
+
+  K = keyMod('null');
+  eq(/未設定/.test(throwsMsg(() => K.getGeminiApiKey_())), true, 'GeminiSecrets が null でも標準エラー');
+  K = keyMod("{ other: 1 }");
+  eq(/未設定/.test(throwsMsg(() => K.getGeminiApiKey_())), true, 'getKey が無いオブジェクトでも標準エラー');
+
+  keyProps = { GEMINI_API_KEY: 'SECRET-VALUE' };
+  eq(JSON.stringify(keyMod("{ getKey: () => 'x' }").geminiKeySource_()).indexOf('SECRET-VALUE'), -1, '診断は鍵の値そのものを返さない（使い方シートやログに出しても漏れない）');
+  keyProps = {};
 }
 
 console.log('\n' + '─'.repeat(62));
